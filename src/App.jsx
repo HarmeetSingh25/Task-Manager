@@ -1,30 +1,66 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Header from './component/Header'
 import Card from './component/Card'
 import Tasklist from "./component/TakList";
 import Createtask from './component/Createtask'
+
 const App = () => {
-  const [Tasklistt, setTasklistt] = useState([])
 
-  const [runningIndex, setRunningIndex] = useState(null)
-  const [seconds, setSeconds] = useState({})
+  // ✅ Load Tasks From localStorage
+  const [Tasklistt, setTasklistt] = useState(() => {
+    const savedTasks = localStorage.getItem("tasks");
+    return savedTasks ? JSON.parse(savedTasks) : [];
+  });
 
-  console.log(Tasklist);
+  // ✅ Load Timer Seconds From localStorage
+  const [seconds, setSeconds] = useState(() => {
+    const savedSeconds = localStorage.getItem("seconds");
+    return savedSeconds ? JSON.parse(savedSeconds) : {};
+  });
 
-  const [count, setcount] = useState(0)
+  const [runningIndex, setRunningIndex] = useState(null);
+  const [count, setcount] = useState(0);
+
+  // ✅ Save Tasks Whenever They Change
+  useEffect(() => {
+    localStorage.setItem("tasks", JSON.stringify(Tasklistt));
+  }, [Tasklistt]);
+
+  // ✅ Save Seconds Whenever They Change
+  useEffect(() => {
+    localStorage.setItem("seconds", JSON.stringify(seconds));
+  }, [seconds]);
+
 
   return (
-    <div className='px-38 py-14  bg-gray-100 h-full'>
-      <Header 
-  count={count} 
-  setcount={setcount}
-  Tasklistt={Tasklistt}
-  runningIndex={runningIndex}
-/>
+    <div className='px-38 py-14 bg-gray-100 min-h-screen'>
 
-<Card Tasklistt={Tasklistt} seconds={seconds} />
-      <Createtask Tasklistt={Tasklistt} setTasklistt={setTasklistt} />
-      <Tasklist runningIndex={runningIndex} setRunningIndex={setRunningIndex} seconds={seconds} setSeconds={setSeconds} Tasklistt={Tasklistt} setTasklistt={setTasklistt} />
+      <Header 
+        count={count} 
+        setcount={setcount}
+        Tasklistt={Tasklistt}
+        runningIndex={runningIndex}
+      />
+
+      <Card 
+        Tasklistt={Tasklistt} 
+        seconds={seconds} 
+      />
+
+      <Createtask 
+        Tasklistt={Tasklistt} 
+        setTasklistt={setTasklistt} 
+      />
+
+      <Tasklist 
+        runningIndex={runningIndex} 
+        setRunningIndex={setRunningIndex} 
+        seconds={seconds} 
+        setSeconds={setSeconds} 
+        Tasklistt={Tasklistt} 
+        setTasklistt={setTasklistt} 
+      />
+
     </div>
   )
 }

@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
 import { useForm } from "react-hook-form";
 const Createtask = ({ Tasklistt, setTasklistt }) => {
-    let { register, handleSubmit, formState: { errors } } = useForm()
+    let { register, handleSubmit, formState: { errors }, reset } = useForm()
     let tasklist = Tasklistt
 
     let onSubmit = (data) => {
         setTasklistt([...tasklist, data])
+        reset()
     }
     console.log(errors);
 
