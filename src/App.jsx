@@ -12,6 +12,8 @@ const App = () => {
     return savedTasks ? JSON.parse(savedTasks) : [];
   });
 
+  const [darkMode, setDarkMode] = useState(false);
+
   // ✅ Load Timer Seconds From localStorage
   const [seconds, setSeconds] = useState(() => {
     const savedSeconds = localStorage.getItem("seconds");
@@ -33,6 +35,7 @@ const App = () => {
 
 
   return (
+    
     <div className='px-38 py-14 bg-gray-100 min-h-screen'>
 
       <Header 
