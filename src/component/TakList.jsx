@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 const TakList = ({
   Tasklistt,
@@ -8,6 +8,9 @@ const TakList = ({
   seconds,
   setSeconds,
 }) => {
+
+  const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
 
   // 🔥 TIMER EFFECT
   useEffect(() => {
@@ -36,34 +39,105 @@ const TakList = ({
 
 
 
+  // 🔥 FILTER LOGIC
+  const filteredTasks = Tasklistt
+    .filter((task) =>
+      task.tasktittle.toLowerCase().includes(search.toLowerCase())
+    )
+    .filter((task) => {
+      if (filter === "active") return !task.completed;
+      if (filter === "completed") return task.completed;
+      return true;
+    });
+
+
+
+  // 🔥 Check if any completed exists
+  const hasCompleted = Tasklistt.some(task => task.completed);
+
+
+
   return (
     <div className="h-full flex flex-col gap-4 w-full">
 
-      {Tasklistt?.map((task, index) => {
+      {/* 🔥 SEARCH + FILTER SECTION */}
+      <div className="flex gap-4 items-center">
 
-        const isRunning = runningIndex === index;
+        <input
+          type="text"
+          placeholder="Search tasks..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="flex-1 border-2 border-gray-200 bg-white px-4 py-3 rounded-xl"
+        />
+
+        <button
+          onClick={() => setFilter("all")}
+          className={`px-5 py-2 rounded-xl border 
+            ${filter === "all" ? "bg-gray-200" : ""}`}
+        >
+          All
+        </button>
+
+        <button
+          onClick={() => setFilter("active")}
+          className={`px-5 py-2 rounded-xl border 
+            ${filter === "active" ? "bg-gray-200" : ""}`}
+        >
+          Active
+        </button>
+
+        <button
+          onClick={() => setFilter("completed")}
+          className={`px-5 py-2 rounded-xl border 
+            ${filter === "completed" ? "bg-gray-200" : ""}`}
+        >
+          Completed
+        </button>
+
+        {/* 🔥 Clear Completed Button */}
+        {hasCompleted && (
+          <button
+            onClick={() => {
+              const updated = Tasklistt.filter(task => !task.completed);
+              setTasklistt(updated);
+              setRunningIndex(null);
+            }}
+            className="px-5 py-2 rounded-xl border-2 border-red-400 text-red-500"
+          >
+            Clear Completed
+          </button>
+        )}
+
+      </div>
+
+
+
+      {/* 🔥 TASK LIST */}
+      {filteredTasks.map((task, index) => {
+
+        const realIndex = Tasklistt.indexOf(task);
+        const isRunning = runningIndex === realIndex;
         const isCompleted = task.completed;
 
         return (
           <div
-            key={index}
+            key={realIndex}
             className="bg-gray-100 rounded-2xl p-6 border-l-4 border-yellow-400 shadow-sm"
           >
             <div className="flex gap-4 items-start">
 
-              {/* ✅ CHECKBOX */}
               <input
                 type="checkbox"
                 checked={isCompleted}
                 onChange={() => {
                   const updatedTasks = [...Tasklistt];
-                  updatedTasks[index].completed =
-                    !updatedTasks[index].completed;
+                  updatedTasks[realIndex].completed =
+                    !updatedTasks[realIndex].completed;
 
                   setTasklistt(updatedTasks);
 
-                  // 🔥 Auto Stop Timer if completed
-                  if (runningIndex === index) {
+                  if (runningIndex === realIndex) {
                     setRunningIndex(null);
                   }
                 }}
@@ -72,7 +146,6 @@ const TakList = ({
 
               <div className="flex flex-col gap-2 w-full">
 
-                {/* ✅ TITLE */}
                 <h3
                   className={`text-2xl font-bold ${
                     isCompleted
@@ -83,7 +156,6 @@ const TakList = ({
                   {task.tasktittle}
                 </h3>
 
-                {/* ✅ DESCRIPTION */}
                 <p
                   className={`${
                     isCompleted
@@ -94,7 +166,6 @@ const TakList = ({
                   {task.TaskDesciption}
                 </p>
 
-                {/* ✅ PRIORITY + TIMER */}
                 <div className="flex items-center gap-4 mt-2">
 
                   <span className="bg-orange-200 text-orange-700 px-4 py-1 rounded-full font-semibold text-sm">
@@ -102,18 +173,17 @@ const TakList = ({
                   </span>
 
                   <span className="bg-gray-200 px-4 py-1 rounded-full text-sm font-medium text-gray-700">
-                    {formatTime(seconds[index] || 0)}
+                    {formatTime(seconds[realIndex] || 0)}
                   </span>
 
                 </div>
 
-                {/* ✅ BUTTONS */}
                 <div className="flex gap-4 mt-4">
 
                   <button
                     disabled={isCompleted}
                     onClick={() =>
-                      setRunningIndex(isRunning ? null : index)
+                      setRunningIndex(isRunning ? null : realIndex)
                     }
                     className={`flex items-center gap-2 px-5 py-2 rounded-xl transition
                       ${
@@ -129,11 +199,11 @@ const TakList = ({
                   <button
                     onClick={() => {
                       const updated = Tasklistt.filter(
-                        (_, i) => i !== index
+                        (_, i) => i !== realIndex
                       );
                       setTasklistt(updated);
 
-                      if (runningIndex === index) {
+                      if (runningIndex === realIndex) {
                         setRunningIndex(null);
                       }
                     }}
